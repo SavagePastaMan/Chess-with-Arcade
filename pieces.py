@@ -20,7 +20,7 @@ class Piece(ABC, arcade.Sprite):
 
     @abstractmethod
     def __init__(self, filename: t.Optional[str], color: Color, x: int, y: int):
-        super().__init__(filename=filename, center_x=x, center_y=y, scale=0.5)
+        super().__init__(filename=filename, center_x=x, center_y=y, scale=1)
         self.piece_color = color
         self.center_x = x
         self.center_y = y
