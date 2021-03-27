@@ -9,18 +9,30 @@ SQUARE_LENGTH = BOARD_LENGTH // 8
 OFFSET = (SCREEN_LENGTH - BOARD_LENGTH) // 2
 
 
+def coor2pos(coor):
+    return coor * SQUARE_LENGTH + OFFSET
+
+
+def pos2coor(pos):
+    return (pos - OFFSET) // SQUARE_LENGTH
+
+
 class ChessWindow(arcade.Window):
     def draw_board(self):
+        for i in range(8):
+            for j in range(8):
+                if (i + j) % 2 == 0:
+                    color = arcade.csscolor.WHITE
+                else:
+                    color = arcade.csscolor.GRAY
 
-        def f(x):
-            return x * SQUARE_LENGTH + OFFSET
-
-        for n in range(2):
-            for i in range(n, 8, 2):
-                for j in range(n, 8, 2):
-                    arcade.draw_lrtb_rectangle_filled(
-                        f(i), f(i + 1), f(j + 1), f(j), arcade.csscolor.WHITE
-                    )
+                arcade.draw_lrtb_rectangle_filled(
+                    coor2pos(i),
+                    coor2pos(i + 1),
+                    coor2pos(j + 1),
+                    coor2pos(j),
+                    color
+                )
 
         # outline board so black squares on border don't look shit
         arcade.draw_lrtb_rectangle_outline(
@@ -33,39 +45,67 @@ class ChessWindow(arcade.Window):
 
     def __init__(self):
         super().__init__(SCREEN_LENGTH, SCREEN_LENGTH, "Chess")
-        arcade.set_background_color(arcade.csscolor.BLACK)
+        arcade.set_background_color(arcade.csscolor.LIGHT_BLUE)
 
-        self.white_list = None
-        self.black_list = None
-        self._board = None
+        self.white = None
+        self.black = None
+
+        # the piece referenced by `self.grabbed` is slaved to the mouse position
+        self.grabbed = None
 
     def setup(self):
-        self.black_list = arcade.SpriteList()
-        self.white_list = arcade.SpriteList()
-
-        self._board = [
-            [pieces.EMPTY, pieces.Bishop()],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-        ]
-
-        self.test_sprite = arcade.Sprite("piece_sprites/2bdab.png", 0.5)
-        self.test_sprite.center_x = 200
-        self.test_sprite.center_y = 200
-        self.white_list.append(self.test_sprite)
+        self.white = arcade.SpriteList()
+        self.white.append(
+            pieces.Pawn(
+                pieces.Color.WHITE,
+                OFFSET + SQUARE_LENGTH // 2,
+                OFFSET + SQUARE_LENGTH // 2,
+            )
+        )
+        self.white.append(
+            pieces.Pawn(
+                pieces.Color.WHITE,
+                OFFSET + SQUARE_LENGTH + SQUARE_LENGTH // 2,
+                OFFSET + SQUARE_LENGTH // 2,
+                )
+        )
+        self.black = arcade.SpriteList()
 
     def on_draw(self):
         arcade.start_render()
         self.draw_board()
-        self.white_list.draw()
+        self.white.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
-        print((x - OFFSET) // SQUARE_LENGTH, (y - OFFSET) // SQUARE_LENGTH, button)
+        # if we aren't holding a piece, pick up the piece at the square
+        # that we clicked, or None if it doesn't exist
+        if self.grabbed is None:
+            intersection = arcade.get_sprites_at_point(
+                (x, y), self.white
+            ) or arcade.get_sprites_at_point((x, y), self.black)
+
+            if intersection:
+                # there should never be two pieces in the same square
+                (self.grabbed,) = intersection
+
+                self.grabbed.center_x = x
+                self.grabbed.center_y = y
+        else:
+            # snap the position to the center of the closest square
+            sx = coor2pos(pos2coor(x))
+            sy = coor2pos(pos2coor(y))
+            self.grabbed.center_x = sx + SQUARE_LENGTH // 2
+            self.grabbed.center_y = sy + SQUARE_LENGTH // 2
+            # drop the reference to the held piece,
+            # so it is no longer pulled along with the mouse
+            self.grabbed = None
+
+            print(pos2coor(x), pos2coor(y))
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        if self.grabbed:
+            self.grabbed.center_x = x
+            self.grabbed.center_y = y
 
 
 if __name__ == "__main__":
