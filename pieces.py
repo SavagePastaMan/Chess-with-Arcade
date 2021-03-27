@@ -32,7 +32,12 @@ class Pawn(Piece):
         return {(a, b) for b in range(8) for a in range(8)}
 
     def __init__(self, color: Color, x, y):
-        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+        super().__init__(
+            f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png",
+            color,
+            x,
+            y,
+        )
 
     def __repr__(self):
         return super().__repr__() + "'P'>"
@@ -43,8 +48,12 @@ class Queen(Piece):
         return {(a, b) for b in range(8) for a in range(8)}
 
     def __init__(self, color: Color, x, y):
-        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
-
+        super().__init__(
+            f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png",
+            color,
+            x,
+            y,
+        )
 
     def __repr__(self):
         return super().__repr__() + "'Q'>"
@@ -55,7 +64,12 @@ class King(Piece):
         return {(a, b) for b in range(8) for a in range(8)}
 
     def __init__(self, color: Color, x, y):
-        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+        super().__init__(
+            f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png",
+            color,
+            x,
+            y,
+        )
 
     def __repr__(self):
         return super().__repr__() + "'K'>"
@@ -66,7 +80,12 @@ class Rook(Piece):
         return {(a, b) for b in range(8) for a in range(8)}
 
     def __init__(self, color: Color, x, y):
-        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+        super().__init__(
+            f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png",
+            color,
+            x,
+            y,
+        )
 
     def __repr__(self):
         return super().__repr__() + "'R'>"
@@ -77,7 +96,12 @@ class Bishop(Piece):
         ...
 
     def __init__(self, color, x, y):
-        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+        super().__init__(
+            f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png",
+            color,
+            x,
+            y,
+        )
 
     def __repr__(self):
         return super().__repr__() + "'B'>"
@@ -88,7 +112,12 @@ class Knight(Piece):
         ...
 
     def __init__(self, color: Color, x, y):
-        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+        super().__init__(
+            f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png",
+            color,
+            x,
+            y,
+        )
 
     def __repr__(self):
         return super().__repr__() + "'N'>"

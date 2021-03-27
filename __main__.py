@@ -6,7 +6,7 @@ BOARD_LENGTH = 600
 
 SQUARE_LENGTH = BOARD_LENGTH // 8
 OFFSET = (SCREEN_LENGTH - BOARD_LENGTH) // 2
-INITIAL_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNRR"
+INITIAL_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 
 
 def coor2pos(coor: float) -> float:
@@ -24,28 +24,29 @@ def center_on_square(point: tuple[float, float]) -> tuple[float, float]:
     return sx + SQUARE_LENGTH // 2, sy + SQUARE_LENGTH // 2
 
 
+def draw_board():
+    for i in range(8):
+        for j in range(8):
+            if (i + j) % 2 == 1:
+                color = arcade.csscolor.WHITE
+            else:
+                color = arcade.csscolor.GRAY
+
+            arcade.draw_lrtb_rectangle_filled(
+                coor2pos(i), coor2pos(i + 1), coor2pos(j + 1), coor2pos(j), color
+            )
+
+    # outline board so black squares on border don't look shit
+    arcade.draw_lrtb_rectangle_outline(
+        OFFSET,
+        SCREEN_LENGTH - OFFSET,
+        SCREEN_LENGTH - OFFSET,
+        OFFSET,
+        arcade.csscolor.WHITE,
+    )
+
+
 class ChessWindow(arcade.Window):
-    def draw_board(self):
-        for i in range(8):
-            for j in range(8):
-                if (i + j) % 2 == 0:
-                    color = arcade.csscolor.WHITE
-                else:
-                    color = arcade.csscolor.GRAY
-
-                arcade.draw_lrtb_rectangle_filled(
-                    coor2pos(i), coor2pos(i + 1), coor2pos(j + 1), coor2pos(j), color
-                )
-
-        # outline board so black squares on border don't look shit
-        arcade.draw_lrtb_rectangle_outline(
-            OFFSET,
-            SCREEN_LENGTH - OFFSET,
-            SCREEN_LENGTH - OFFSET,
-            OFFSET,
-            arcade.csscolor.WHITE,
-        )
-
     def __init__(self):
         super().__init__(SCREEN_LENGTH, SCREEN_LENGTH, "Chess")
         arcade.set_background_color(arcade.csscolor.LIGHT_BLUE)
@@ -73,7 +74,7 @@ class ChessWindow(arcade.Window):
         )
         for j, row in enumerate(fen):
             for i, char in enumerate(row):
-                if char == '8':
+                if char == "8":
                     continue
                 piece = piece_map[char.lower()]
                 color = pieces.Color.BLACK if char.islower() else pieces.Color.WHITE
@@ -81,15 +82,23 @@ class ChessWindow(arcade.Window):
                     piece(
                         color,
                         OFFSET + SQUARE_LENGTH * i + SQUARE_LENGTH // 2,
-                        OFFSET + SQUARE_LENGTH * j + SQUARE_LENGTH // 2,
+                        SCREEN_LENGTH
+                        - (OFFSET + SQUARE_LENGTH * j + SQUARE_LENGTH // 2),
                     )
                 )
 
     def on_draw(self):
         arcade.start_render()
-        self.draw_board()
-        self.white.draw()
-        self.black.draw()
+        draw_board()
+
+        # weird hacky thing to make sure the piece the user is moving
+        # renders on top of stationary pieces
+        if self.grabbed and self.grabbed.piece_color is pieces.Color.WHITE:
+            self.black.draw()
+            self.white.draw()
+        else:
+            self.white.draw()
+            self.black.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         # if we aren't holding a piece, pick up the piece at the square
