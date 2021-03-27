@@ -1,5 +1,4 @@
 import arcade
-import board
 import pieces
 
 SCREEN_LENGTH = 800
@@ -9,12 +8,19 @@ SQUARE_LENGTH = BOARD_LENGTH // 8
 OFFSET = (SCREEN_LENGTH - BOARD_LENGTH) // 2
 
 
-def coor2pos(coor):
+def coor2pos(coor: float) -> float:
     return coor * SQUARE_LENGTH + OFFSET
 
 
-def pos2coor(pos):
+def pos2coor(pos: float) -> float:
     return (pos - OFFSET) // SQUARE_LENGTH
+
+
+def center_on_square(point: tuple[float, float]) -> tuple[float, float]:
+    x, y = point
+    sx = coor2pos(pos2coor(x))
+    sy = coor2pos(pos2coor(y))
+    return sx + SQUARE_LENGTH // 2, sy + SQUARE_LENGTH // 2
 
 
 class ChessWindow(arcade.Window):
@@ -52,6 +58,8 @@ class ChessWindow(arcade.Window):
 
         # the piece referenced by `self.grabbed` is slaved to the mouse position
         self.grabbed = None
+        self.taken_from_x = None
+        self.taken_from_y = None
 
     def setup(self):
         self.white = arcade.SpriteList()
@@ -66,8 +74,8 @@ class ChessWindow(arcade.Window):
             pieces.Pawn(
                 pieces.Color.WHITE,
                 OFFSET + SQUARE_LENGTH + SQUARE_LENGTH // 2,
-                OFFSET + SQUARE_LENGTH // 2,
-                )
+                SCREEN_LENGTH - OFFSET - SQUARE_LENGTH // 2,
+            )
         )
         self.black = arcade.SpriteList()
 
@@ -88,14 +96,35 @@ class ChessWindow(arcade.Window):
                 # there should never be two pieces in the same square
                 (self.grabbed,) = intersection
 
+                # if the square we try to drop it at is invalid,
+                # return it to this location
+                cx, cy = center_on_square((x, y))
+                self.taken_from_x = cx
+                self.taken_from_y = cy
+
                 self.grabbed.center_x = x
                 self.grabbed.center_y = y
         else:
-            # snap the position to the center of the closest square
-            sx = coor2pos(pos2coor(x))
-            sy = coor2pos(pos2coor(y))
-            self.grabbed.center_x = sx + SQUARE_LENGTH // 2
-            self.grabbed.center_y = sy + SQUARE_LENGTH // 2
+            coord_x = pos2coor(x)
+            coord_y = pos2coor(y)
+            # capture a piece by removing it from the sprite list
+            if (coord_x, coord_y) in self.grabbed.possible_moves():
+                cx, cy = center_on_square((x, y))
+                if self.grabbed.piece_color is pieces.Color.WHITE:
+                    if piece := arcade.get_sprites_at_point((x, y), self.black):
+                        self.black.remove(piece)
+
+                elif self.grabbed.piece_color is pieces.Color.BLACK:
+                    if piece := arcade.get_sprites_at_point((x, y), self.white):
+                        self.white.remove(piece)
+                self.grabbed.center_x = cx
+                self.grabbed.center_y = cy
+            else:
+                self.grabbed.center_x = self.taken_from_x
+                self.grabbed.center_y = self.taken_from_y
+                self.taken_from_x = None
+                self.taken_from_y = None
+
             # drop the reference to the held piece,
             # so it is no longer pulled along with the mouse
             self.grabbed = None
