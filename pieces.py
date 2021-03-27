@@ -7,13 +7,12 @@ import typing as t
 class Color(Enum):
     WHITE = auto()
     BLACK = auto()
-    EMPTY = auto()
 
 
 class Piece(ABC, arcade.Sprite):
     @abstractmethod
-    def possible_moves(self) -> list[tuple[int, int]]:
-        return []
+    def possible_moves(self) -> set[tuple[int, int]]:
+        return set()
 
     @abstractmethod
     def __repr__(self):
@@ -28,30 +27,19 @@ class Piece(ABC, arcade.Sprite):
         self.board_loc = (x, y)
 
 
-class __Empty(Piece):
-    def possible_moves(self) -> list[tuple[int, int]]:
-        ...
-
-    def __repr__(self):
-        return super().__repr__() + "'E'>"
-
-    def __init__(self, color, x, y):
-        super().__init__(None, color, x, y)
-
-
-# EMPTY = __Empty(Color.EMPTY, 0, 0)
-
-
 class Pawn(Piece):
-    def possible_moves(self):
-        return [
+    def possible_moves(self) -> set[tuple[int, int]]:
+        return {
             (a, b)
-            for a in range(8)
             for b in range(8)
-        ]
+            for a in range(8)
+        }
 
     def __init__(self, color: Color, x, y):
-        super().__init__("piece_sprites/2bdab.png", color, x, y)
+        if color is Color.WHITE:
+            super().__init__("piece_sprites/2bdab.png", color, x, y)
+        else:
+            super().__init__("piece_sprites/flushpens.png", color, x, y)
 
     def __repr__(self):
         return super().__repr__() + "'P'>"

@@ -72,7 +72,7 @@ class ChessWindow(arcade.Window):
         )
         self.white.append(
             pieces.Pawn(
-                pieces.Color.WHITE,
+                pieces.Color.BLACK,
                 OFFSET + SQUARE_LENGTH + SQUARE_LENGTH // 2,
                 SCREEN_LENGTH - OFFSET - SQUARE_LENGTH // 2,
             )
@@ -105,18 +105,17 @@ class ChessWindow(arcade.Window):
                 self.grabbed.center_x = x
                 self.grabbed.center_y = y
         else:
-            coord_x = pos2coor(x)
-            coord_y = pos2coor(y)
+            cx, cy = center_on_square((x, y))
+            coord_x = pos2coor(cx)
+            coord_y = pos2coor(cy)
             # capture a piece by removing it from the sprite list
             if (coord_x, coord_y) in self.grabbed.possible_moves():
-                cx, cy = center_on_square((x, y))
                 if self.grabbed.piece_color is pieces.Color.WHITE:
                     if piece := arcade.get_sprites_at_point((x, y), self.black):
-                        self.black.remove(piece)
-
+                        self.black.remove(*piece)
                 elif self.grabbed.piece_color is pieces.Color.BLACK:
                     if piece := arcade.get_sprites_at_point((x, y), self.white):
-                        self.white.remove(piece)
+                        self.white.remove(*piece)
                 self.grabbed.center_x = cx
                 self.grabbed.center_y = cy
             else:
@@ -129,7 +128,6 @@ class ChessWindow(arcade.Window):
             # so it is no longer pulled along with the mouse
             self.grabbed = None
 
-            print(pos2coor(x), pos2coor(y))
 
     def on_mouse_motion(self, x, y, dx, dy):
         if self.grabbed:
