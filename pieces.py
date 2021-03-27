@@ -16,7 +16,7 @@ class Piece(ABC, arcade.Sprite):
 
     @abstractmethod
     def __repr__(self):
-        return f"<Piece {self.piece_color.name} "
+        return f"<Piece {self.piece_color.name.lower()} "
 
     @abstractmethod
     def __init__(self, filename: t.Optional[str], color: Color, x: int, y: int):
@@ -29,20 +29,47 @@ class Piece(ABC, arcade.Sprite):
 
 class Pawn(Piece):
     def possible_moves(self) -> set[tuple[int, int]]:
-        return {
-            (a, b)
-            for b in range(8)
-            for a in range(8)
-        }
+        return {(a, b) for b in range(8) for a in range(8)}
 
     def __init__(self, color: Color, x, y):
-        if color is Color.WHITE:
-            super().__init__("piece_sprites/2bdab.png", color, x, y)
-        else:
-            super().__init__("piece_sprites/flushpens.png", color, x, y)
+        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
 
     def __repr__(self):
         return super().__repr__() + "'P'>"
+
+
+class Queen(Piece):
+    def possible_moves(self) -> set[tuple[int, int]]:
+        return {(a, b) for b in range(8) for a in range(8)}
+
+    def __init__(self, color: Color, x, y):
+        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+
+
+    def __repr__(self):
+        return super().__repr__() + "'Q'>"
+
+
+class King(Piece):
+    def possible_moves(self) -> set[tuple[int, int]]:
+        return {(a, b) for b in range(8) for a in range(8)}
+
+    def __init__(self, color: Color, x, y):
+        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+
+    def __repr__(self):
+        return super().__repr__() + "'K'>"
+
+
+class Rook(Piece):
+    def possible_moves(self) -> set[tuple[int, int]]:
+        return {(a, b) for b in range(8) for a in range(8)}
+
+    def __init__(self, color: Color, x, y):
+        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
+
+    def __repr__(self):
+        return super().__repr__() + "'R'>"
 
 
 class Bishop(Piece):
@@ -50,7 +77,7 @@ class Bishop(Piece):
         ...
 
     def __init__(self, color, x, y):
-        super().__init__(color, x, y)
+        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
 
     def __repr__(self):
         return super().__repr__() + "'B'>"
@@ -61,18 +88,7 @@ class Knight(Piece):
         ...
 
     def __init__(self, color: Color, x, y):
-        super().__init__(color, x, y)
+        super().__init__(f"piece_sprites/{self.__class__.__name__.lower()}_{color.name.lower()}.png", color, x, y)
 
     def __repr__(self):
         return super().__repr__() + "'N'>"
-
-
-class Queen(Piece):
-    def __init__(self, color: Color, x, y):
-        super().__init__(color, x, y)
-
-    def __repr__(self):
-        return super().__repr__() + "'Q'>"
-
-    def possible_moves(self):
-        pass

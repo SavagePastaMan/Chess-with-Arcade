@@ -6,6 +6,7 @@ BOARD_LENGTH = 600
 
 SQUARE_LENGTH = BOARD_LENGTH // 8
 OFFSET = (SCREEN_LENGTH - BOARD_LENGTH) // 2
+INITIAL_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNRR"
 
 
 def coor2pos(coor: float) -> float:
@@ -33,11 +34,7 @@ class ChessWindow(arcade.Window):
                     color = arcade.csscolor.GRAY
 
                 arcade.draw_lrtb_rectangle_filled(
-                    coor2pos(i),
-                    coor2pos(i + 1),
-                    coor2pos(j + 1),
-                    coor2pos(j),
-                    color
+                    coor2pos(i), coor2pos(i + 1), coor2pos(j + 1), coor2pos(j), color
                 )
 
         # outline board so black squares on border don't look shit
@@ -63,26 +60,36 @@ class ChessWindow(arcade.Window):
 
     def setup(self):
         self.white = arcade.SpriteList()
-        self.white.append(
-            pieces.Pawn(
-                pieces.Color.WHITE,
-                OFFSET + SQUARE_LENGTH // 2,
-                OFFSET + SQUARE_LENGTH // 2,
-            )
-        )
-        self.white.append(
-            pieces.Pawn(
-                pieces.Color.BLACK,
-                OFFSET + SQUARE_LENGTH + SQUARE_LENGTH // 2,
-                SCREEN_LENGTH - OFFSET - SQUARE_LENGTH // 2,
-            )
-        )
         self.black = arcade.SpriteList()
+
+        fen = INITIAL_POSITION.split("/")
+        piece_map = dict(
+            p=pieces.Pawn,
+            r=pieces.Rook,
+            n=pieces.Knight,
+            b=pieces.Bishop,
+            q=pieces.Queen,
+            k=pieces.King,
+        )
+        for j, row in enumerate(fen):
+            for i, char in enumerate(row):
+                if char == '8':
+                    continue
+                piece = piece_map[char.lower()]
+                color = pieces.Color.BLACK if char.islower() else pieces.Color.WHITE
+                getattr(self, color.name.lower()).append(
+                    piece(
+                        color,
+                        OFFSET + SQUARE_LENGTH * i + SQUARE_LENGTH // 2,
+                        OFFSET + SQUARE_LENGTH * j + SQUARE_LENGTH // 2,
+                    )
+                )
 
     def on_draw(self):
         arcade.start_render()
         self.draw_board()
         self.white.draw()
+        self.black.draw()
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         # if we aren't holding a piece, pick up the piece at the square
@@ -127,7 +134,6 @@ class ChessWindow(arcade.Window):
             # drop the reference to the held piece,
             # so it is no longer pulled along with the mouse
             self.grabbed = None
-
 
     def on_mouse_motion(self, x, y, dx, dy):
         if self.grabbed:
